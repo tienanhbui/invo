@@ -15,135 +15,120 @@ use Phalcon\Acl\Adapter\Memory as AclList;
  */
 class SecurityPlugin extends Plugin
 {
-    /**
-     * Returns an existing or new access control list
-     *
-     * @returns AclList
-     */
-    public function getAcl()
-    {
-        if (!isset($this->persistent->acl)) {
-            $acl = new AclList();
+	/**
+	 * Returns an existing or new access control list
+	 *
+	 * @returns AclList
+	 */
+	public function getAcl()
+	{
+		if (!isset($this->persistent->acl)) {
 
-            $acl->setDefaultAction(Acl::DENY);
+			$acl = new AclList();
 
-            // Register roles
-            $roles = [
-                'users'  => new Role(
-                    'Users',
-                    'Member privileges, granted after sign in.',
-                ),
-                'guests' => new Role(
-                    'Guests',
-                    'Anyone browsing the site who is not signed in is considered to be a "Guest".',
-                )
-            ];
+			$acl->setDefaultAction(Acl::DENY);
 
-            foreach ($roles as $role) {
-                $acl->addRole($role);
-            }
+			// Register roles
+			$roles = [
+				'users'  => new Role(
+					'Users',
+					'Member privileges, granted after sign in.'
+				),
+				'guests' => new Role(
+					'Guests',
+					'Anyone browsing the site who is not signed in is considered to be a "Guest".'
+				)
+			];
 
-            //Private area resources
-            $privateResources = [
-                'companies'    => ['index', 'search', 'new', 'edit', 'save', 'create', 'delete'],
-                'products'     => ['index', 'search', 'new', 'edit', 'save', 'create', 'delete'],
-                'producttypes' => ['index', 'search', 'new', 'edit', 'save', 'create', 'delete'],
-                'invoices'     => ['index', 'profile'],
-            ];
-            foreach ($privateResources as $resource => $actions) {
-                $acl->addResource(
-                    new Resource($resource),
-                    $actions
-                );
-            }
+			foreach ($roles as $role) {
+				$acl->addRole($role);
+			}
 
-            //Public area resources
-            $publicResources = [
-                'index'      => ['index'],
-                'about'      => ['index'],
-                'register'   => ['index'],
-                'errors'     => ['show401', 'show404', 'show500'],
-                'session'    => ['index', 'register', 'start', 'end'],
-                'contact'    => ['index', 'send'],
-            ];
-            foreach ($publicResources as $resource => $actions) {
-                $acl->addResource(
-                    new Resource($resource),
-                    $actions
-                );
-            }
+			//Private area resources
+			$privateResources = [
+				'companies'    => ['index', 'search', 'new', 'edit', 'save', 'create', 'delete'],
+				'products'     => ['index', 'search', 'new', 'edit', 'save', 'create', 'delete'],
+				'producttypes' => ['index', 'search', 'new', 'edit', 'save', 'create', 'delete'],
+				'invoices'     => ['index', 'profile']
+			];
+			foreach ($privateResources as $resource => $actions) {
+				$acl->addResource(new Resource($resource), $actions);
+			}
 
-            //Grant access to public areas to both users and guests
-            foreach ($roles as $role) {
-                foreach ($publicResources as $resource => $actions) {
-                    foreach ($actions as $action) {
-                        $acl->allow(
-                            $role->getName(),
-                            $resource,
-                            $action
-                        );
-                    }
-                }
-            }
+			//Public area resources
+			$publicResources = [
+				'index'      => ['index'],
+				'about'      => ['index'],
+				'register'   => ['index'],
+				'errors'     => ['show401', 'show404', 'show500'],
+				'session'    => ['index', 'register', 'start', 'end'],
+				'contact'    => ['index', 'send']
+			];
+			foreach ($publicResources as $resource => $actions) {
+				$acl->addResource(new Resource($resource), $actions);
+			}
 
-            //Grant access to private area to role Users
-            foreach ($privateResources as $resource => $actions) {
-                foreach ($actions as $action) {
-                    $acl->allow('Users', $resource, $action);
-                }
-            }
+			//Grant access to public areas to both users and guests
+			foreach ($roles as $role) {
+				foreach ($publicResources as $resource => $actions) {
+					foreach ($actions as $action){
+						$acl->allow($role->getName(), $resource, $action);
+					}
+				}
+			}
 
-            //The acl is stored in session, APC would be useful here too
-            $this->persistent->acl = $acl;
-        }
+			//Grant access to private area to role Users
+			foreach ($privateResources as $resource => $actions) {
+				foreach ($actions as $action){
+					$acl->allow('Users', $resource, $action);
+				}
+			}
 
-        return $this->persistent->acl;
-    }
+			//The acl is stored in session, APC would be useful here too
+			$this->persistent->acl = $acl;
+		}
 
-    /**
-     * This action is executed before execute any action in the application
-     *
-     * @param Event $event
-     * @param Dispatcher $dispatcher
-     * @return bool
-     */
-    public function beforeExecuteRoute(Event $event, Dispatcher $dispatcher)
-    {
-        $auth = $this->session->get('auth');
-        if (!$auth) {
-            $role = 'Guests';
-        } else {
-            $role = 'Users';
-        }
+		return $this->persistent->acl;
+	}
 
-        $controller = $dispatcher->getControllerName();
-        $action = $dispatcher->getActionName();
+	/**
+	 * This action is executed before execute any action in the application
+	 *
+	 * @param Event $event
+	 * @param Dispatcher $dispatcher
+	 * @return bool
+	 */
+	public function beforeExecuteRoute(Event $event, Dispatcher $dispatcher)
+	{
+		$auth = $this->session->get('auth');
+		if (!$auth){
+			$role = 'Guests';
+		} else {
+			$role = 'Users';
+		}
 
-        $acl = $this->getAcl();
+		$controller = $dispatcher->getControllerName();
+		$action = $dispatcher->getActionName();
 
-        if (!$acl->isResource($controller)) {
-            $dispatcher->forward(
-                [
-                    'controller' => 'errors',
-                    'action'     => 'show404',
-                ]
-            );
+		$acl = $this->getAcl();
 
-            return false;
-        }
+		if (!$acl->isResource($controller)) {
+			$dispatcher->forward([
+				'controller' => 'errors',
+				'action'     => 'show404'
+			]);
 
-        $allowed = $acl->isAllowed($role, $controller, $action);
-        if (!$allowed) {
-            $dispatcher->forward(
-                [
-                    'controller' => 'errors',
-                    'action'     => 'show401',
-                ]
-            );
+			return false;
+		}
 
-            $this->session->destroy();
-
-            return false;
-        }
-    }
+		$allowed = $acl->isAllowed($role, $controller, $action);
+		if (!$allowed) {
+			$dispatcher->forward([
+				'controller' => 'errors',
+				'action'     => 'show401'
+			]);
+                        $this->session->destroy();
+			return false;
+		}
+	}
 }

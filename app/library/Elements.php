@@ -71,6 +71,7 @@ class Elements extends Component
      */
     public function getMenu()
     {
+
         $auth = $this->session->get('auth');
         if ($auth) {
             $this->_headerMenu['navbar-right']['session'] = [
@@ -85,24 +86,19 @@ class Elements extends Component
         foreach ($this->_headerMenu as $position => $menu) {
             echo '<div class="nav-collapse">';
             echo '<ul class="nav navbar-nav ', $position, '">';
-
             foreach ($menu as $controller => $option) {
                 if ($controllerName == $controller) {
                     echo '<li class="active">';
                 } else {
                     echo '<li>';
                 }
-
-                echo $this->tag->linkTo(
-                    $controller . '/' . $option['action'],
-                    $option['caption']
-                );
+                echo $this->tag->linkTo($controller . '/' . $option['action'], $option['caption']);
                 echo '</li>';
             }
-
             echo '</ul>';
             echo '</div>';
         }
+
     }
 
     /**
@@ -112,23 +108,15 @@ class Elements extends Component
     {
         $controllerName = $this->view->getControllerName();
         $actionName = $this->view->getActionName();
-
         echo '<ul class="nav nav-tabs">';
-
         foreach ($this->_tabs as $caption => $option) {
             if ($option['controller'] == $controllerName && ($option['action'] == $actionName || $option['any'])) {
                 echo '<li class="active">';
             } else {
                 echo '<li>';
             }
-
-            echo $this->tag->linkTo(
-                $option['controller'] . '/' . $option['action'],
-                $caption
-            );
-            echo '</li>';
+            echo $this->tag->linkTo($option['controller'] . '/' . $option['action'], $caption), '</li>';
         }
-
         echo '</ul>';
     }
 }

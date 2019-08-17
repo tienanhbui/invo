@@ -8,7 +8,6 @@ class CompaniesController extends ControllerBase
     public function initialize()
     {
         $this->tag->setTitle('Manage your companies');
-
         parent::initialize();
     }
 
@@ -18,7 +17,6 @@ class CompaniesController extends ControllerBase
     public function indexAction()
     {
         $this->session->conditions = null;
-
         $this->view->form = new CompaniesForm;
     }
 
@@ -29,12 +27,7 @@ class CompaniesController extends ControllerBase
     {
         $numberPage = 1;
         if ($this->request->isPost()) {
-            $query = Criteria::fromInput(
-                $this->di,
-                "Companies",
-                $this->request->getPost()
-            );
-
+            $query = Criteria::fromInput($this->di, "Companies", $this->request->getPost());
             $this->persistent->searchParams = $query->getParams();
         } else {
             $numberPage = $this->request->getQuery("page", "int");
@@ -57,13 +50,11 @@ class CompaniesController extends ControllerBase
             );
         }
 
-        $paginator = new Paginator(
-            [
-                "data"  => $companies,
-                "limit" => 10,
-                "page"  => $numberPage,
-            ]
-        );
+        $paginator = new Paginator([
+            "data"  => $companies,
+            "limit" => 10,
+            "page"  => $numberPage
+        ]);
 
         $this->view->page = $paginator->getPaginate();
         $this->view->companies = $companies;
@@ -74,12 +65,7 @@ class CompaniesController extends ControllerBase
      */
     public function newAction()
     {
-        $this->view->form = new CompaniesForm(
-            null,
-            [
-                'edit' => true,
-            ]
-        );
+        $this->view->form = new CompaniesForm(null, ['edit' => true]);
     }
 
     /**
@@ -87,9 +73,10 @@ class CompaniesController extends ControllerBase
      */
     public function editAction($id)
     {
-        if (!$this->request->isPost()) {
-            $company = Companies::findFirstById($id);
 
+        if (!$this->request->isPost()) {
+
+            $company = Companies::findFirstById($id);
             if (!$company) {
                 $this->flash->error("Company was not found");
 
@@ -101,12 +88,7 @@ class CompaniesController extends ControllerBase
                 );
             }
 
-            $this->view->form = new CompaniesForm(
-                $company,
-                [
-                    'edit' => true,
-                ]
-            );
+            $this->view->form = new CompaniesForm($company, ['edit' => true]);
         }
     }
 
@@ -183,9 +165,7 @@ class CompaniesController extends ControllerBase
         }
 
         $id = $this->request->getPost("id", "int");
-
         $company = Companies::findFirstById($id);
-
         if (!$company) {
             $this->flash->error("Company does not exist");
 
@@ -245,8 +225,8 @@ class CompaniesController extends ControllerBase
      */
     public function deleteAction($id)
     {
-        $companies = Companies::findFirstById($id);
 
+        $companies = Companies::findFirstById($id);
         if (!$companies) {
             $this->flash->error("Company was not found");
 

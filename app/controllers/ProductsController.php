@@ -13,7 +13,6 @@ class ProductsController extends ControllerBase
     public function initialize()
     {
         $this->tag->setTitle('Manage your products');
-
         parent::initialize();
     }
 
@@ -23,7 +22,6 @@ class ProductsController extends ControllerBase
     public function indexAction()
     {
         $this->session->conditions = null;
-
         $this->view->form = new ProductsForm;
     }
 
@@ -34,18 +32,13 @@ class ProductsController extends ControllerBase
     {
         $numberPage = 1;
         if ($this->request->isPost()) {
-            $query = Criteria::fromInput(
-                $this->di,
-                "Products",
-                $this->request->getPost()
-            );
-
+            $query = Criteria::fromInput($this->di, "Products", $this->request->getPost());
             $this->persistent->searchParams = $query->getParams();
         } else {
             $numberPage = $this->request->getQuery("page", "int");
         }
 
-        $parameters = [];
+        $parameters = array();
         if ($this->persistent->searchParams) {
             $parameters = $this->persistent->searchParams;
         }
@@ -62,13 +55,11 @@ class ProductsController extends ControllerBase
             );
         }
 
-        $paginator = new Paginator(
-            [
-                "data"  => $products,
-                "limit" => 10,
-                "page"  => $numberPage,
-            ]
-        );
+        $paginator = new Paginator(array(
+            "data"  => $products,
+            "limit" => 10,
+            "page"  => $numberPage
+        ));
 
         $this->view->page = $paginator->getPaginate();
     }
@@ -78,12 +69,7 @@ class ProductsController extends ControllerBase
      */
     public function newAction()
     {
-        $this->view->form = new ProductsForm(
-            null,
-            [
-                'edit' => true,
-            ]
-        );
+        $this->view->form = new ProductsForm(null, array('edit' => true));
     }
 
     /**
@@ -91,9 +77,10 @@ class ProductsController extends ControllerBase
      */
     public function editAction($id)
     {
-        if (!$this->request->isPost()) {
-            $product = Products::findFirstById($id);
 
+        if (!$this->request->isPost()) {
+
+            $product = Products::findFirstById($id);
             if (!$product) {
                 $this->flash->error("Product was not found");
 
@@ -105,12 +92,7 @@ class ProductsController extends ControllerBase
                 );
             }
 
-            $this->view->form = new ProductsForm(
-                $product,
-                [
-                    'edit' => true,
-                ]
-            );
+            $this->view->form = new ProductsForm($product, array('edit' => true));
         }
     }
 
@@ -132,7 +114,6 @@ class ProductsController extends ControllerBase
         $product = new Products();
 
         $data = $this->request->getPost();
-
         if (!$form->isValid($data, $product)) {
             foreach ($form->getMessages() as $message) {
                 $this->flash->error($message);
@@ -190,7 +171,6 @@ class ProductsController extends ControllerBase
         $id = $this->request->getPost("id", "int");
 
         $product = Products::findFirstById($id);
-
         if (!$product) {
             $this->flash->error("Product does not exist");
 
@@ -203,7 +183,6 @@ class ProductsController extends ControllerBase
         }
 
         $form = new ProductsForm;
-
         $this->view->form = $form;
 
         $data = $this->request->getPost();
@@ -255,8 +234,8 @@ class ProductsController extends ControllerBase
      */
     public function deleteAction($id)
     {
-        $products = Products::findFirstById($id);
 
+        $products = Products::findFirstById($id);
         if (!$products) {
             $this->flash->error("Product was not found");
 
@@ -283,11 +262,11 @@ class ProductsController extends ControllerBase
 
         $this->flash->success("Product was deleted");
 
-        return $this->dispatcher->forward(
-            [
-                "controller" => "products",
-                "action"     => "index",
-            ]
-        );
+            return $this->dispatcher->forward(
+                [
+                    "controller" => "products",
+                    "action"     => "index",
+                ]
+            );
     }
 }

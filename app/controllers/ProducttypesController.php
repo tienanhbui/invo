@@ -13,7 +13,6 @@ class ProductTypesController extends ControllerBase
     public function initialize()
     {
         $this->tag->setTitle('Manage your products types');
-
         parent::initialize();
     }
 
@@ -23,7 +22,6 @@ class ProductTypesController extends ControllerBase
     public function indexAction()
     {
         $this->session->conditions = null;
-
         $this->view->form = new ProductTypesForm;
     }
 
@@ -34,12 +32,7 @@ class ProductTypesController extends ControllerBase
     {
         $numberPage = 1;
         if ($this->request->isPost()) {
-            $query = Criteria::fromInput(
-                $this->di,
-                "ProductTypes",
-                $this->request->getPost()
-            );
-
+            $query = Criteria::fromInput($this->di, "ProductTypes", $this->request->getPost());
             $this->persistent->searchParams = $query->getParams();
         } else {
             $numberPage = $this->request->getQuery("page", "int");
@@ -51,7 +44,6 @@ class ProductTypesController extends ControllerBase
         }
 
         $productTypes = ProductTypes::find($parameters);
-
         if (count($productTypes) == 0) {
             $this->flash->notice("The search did not find any product types");
 
@@ -63,13 +55,11 @@ class ProductTypesController extends ControllerBase
             );
         }
 
-        $paginator = new Paginator(
-            [
-                "data"  => $productTypes,
-                "limit" => 10,
-                "page"  => $numberPage,
-            ]
-        );
+        $paginator = new Paginator([
+            "data"  => $productTypes,
+            "limit" => 10,
+            "page"  => $numberPage
+        ]);
 
         $this->view->page = $paginator->getPaginate();
         $this->view->productTypes = $productTypes;
@@ -80,12 +70,7 @@ class ProductTypesController extends ControllerBase
      */
     public function newAction()
     {
-        $this->view->form = new ProductTypesForm(
-            null,
-            [
-                'edit' => true,
-            ]
-        );
+        $this->view->form = new ProductTypesForm(null, ['edit' => true]);
     }
 
     /**
@@ -94,8 +79,8 @@ class ProductTypesController extends ControllerBase
     public function editAction($id)
     {
         if (!$this->request->isPost()) {
-            $producttypes = ProductTypes::findFirstById($id);
 
+            $producttypes = ProductTypes::findFirstById($id);
             if (!$producttypes) {
                 $this->flash->error("Product type to edit was not found");
 
@@ -107,12 +92,7 @@ class ProductTypesController extends ControllerBase
                 );
             }
 
-            $this->view->form = new ProductTypesForm(
-                $producttypes,
-                [
-                    'edit' => true,
-                ]
-            );
+            $this->view->form = new ProductTypesForm($producttypes, ['edit' => true]);
         }
     }
 
@@ -192,7 +172,6 @@ class ProductTypesController extends ControllerBase
         $productTypes = ProductTypes::findFirstById($id);
         if (!$productTypes) {
             $this->flash->error("productTypes does not exist");
-
             return $this->dispatcher->forward(
                 [
                     "controller" => "producttypes",

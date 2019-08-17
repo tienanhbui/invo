@@ -10,7 +10,6 @@ class ContactController extends ControllerBase
     public function initialize()
     {
         $this->tag->setTitle('Contact us');
-
         parent::initialize();
     }
 
@@ -36,9 +35,8 @@ class ContactController extends ControllerBase
         $form = new ContactForm;
         $contact = new Contact();
 
-        $data = $this->request->getPost();
-
         // Validate the form
+        $data = $this->request->getPost();
         if (!$form->isValid($data, $contact)) {
             foreach ($form->getMessages() as $message) {
                 $this->flash->error($message);
@@ -65,9 +63,7 @@ class ContactController extends ControllerBase
             );
         }
 
-        $this->flash->success(
-            'Thanks, we will contact you in the next few hours'
-        );
+        $this->flash->success('Thanks, we will contact you in the next few hours');
 
         return $this->dispatcher->forward(
             [

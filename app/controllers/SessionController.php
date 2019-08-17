@@ -10,7 +10,6 @@ class SessionController extends ControllerBase
     public function initialize()
     {
         $this->tag->setTitle('Sign Up/Sign In');
-
         parent::initialize();
     }
 
@@ -29,37 +28,29 @@ class SessionController extends ControllerBase
      */
     private function _registerSession(Users $user)
     {
-        $this->session->set(
-            'auth',
-            [
-                'id'   => $user->id,
-                'name' => $user->name,
-            ]
-        );
+        $this->session->set('auth', [
+            'id' => $user->id,
+            'name' => $user->name
+        ]);
     }
 
     /**
      * This action authenticate and logs an user into the application
+     *
      */
     public function startAction()
     {
         if ($this->request->isPost()) {
+
             $email = $this->request->getPost('email');
             $password = $this->request->getPost('password');
 
-            $user = Users::findFirst(
-                [
-                    "(email = :email: OR username = :email:) AND password = :password: AND active = 'Y'",
-                    'bind' => [
-                        'email'    => $email,
-                        'password' => sha1($password),
-                    ]
-                ]
-            );
-
+            $user = Users::findFirst([
+                "(email = :email: OR username = :email:) AND password = :password: AND active = 'Y'",
+                'bind' => ['email' => $email, 'password' => sha1($password)]
+            ]);
             if ($user != false) {
                 $this->_registerSession($user);
-
                 $this->flash->success('Welcome ' . $user->name);
 
                 return $this->dispatcher->forward(
@@ -89,7 +80,6 @@ class SessionController extends ControllerBase
     public function endAction()
     {
         $this->session->remove('auth');
-
         $this->flash->success('Goodbye!');
 
         return $this->dispatcher->forward(
